@@ -1,13 +1,14 @@
 # Test Unitaire. 
-Dans ce dossier vous trouverez deux fichier de test unitaire: 
-- Les test du token ERC20
-- Les test du contract de l'ICO. 
+Dans ce dossier vous trouverez trois fichiers de test unitaire: 
+- Les test du token ERC20,
+- Les test du contract de l'ICO, 
+- Les test du contract de la calculette (calcKB9).
 
 ## KB9 test : 
 
 On test, ici, différente fonction du Token ERC-20 que nous avons crée à partir de la librairie OpenZeppelin. 
 
-Tout d'abord, on verrifie si le Nom et le Symbole sont correct. 
+Tout d'abord, on verifie si le Nom et le Symbole sont correct. 
 
 ```js 
  it(`Should have name ${NAME}`, async function () {
@@ -30,7 +31,7 @@ Tout d'abord, on verrifie si le Nom et le Symbole sont correct.
   })
   ```
 
-  On test aussi les emites, afin de verifier qu'on recupere les bonne data. 
+  On test aussi les emites, afin de verifier qu'on recupere les bonnes datas. 
 
   ```js 
    it('should emit a Transer event', async function () {
@@ -102,9 +103,9 @@ it('Should revert if not owner of tokens', async function () {
 
 #### buyToken et receive : 
 
-Les function buyToken et receive exécute les mêmes parametres. La difference qu'avec receive l'utilisateur envoyer ses ether directement à l'adresse du smart-contract de l'ico.
-Ces fonctions permettent à un utilistauer d'acquerire notre token. 
-Ici, nous effectuons differents tests. Avant chacun de ces tests, nous simullons deux investissement afin d'etre sur que nos fonction s'exécutent correctement. 
+Les fonctions buyToken et receive exécute les mêmes parametres. La difference, est, qu'avec la fonction receive, l'utilisateur envoyer ses ethers directement à l'adresse du smart-contract de l'ico.
+Ces fonctions permettent à un utilisateur d'acquerire notre token. 
+Ici, nous effectuons differents tests. Avant chacun de ces tests, nous simullons deux investissements afin d'être sur que nos fonctions s'exécutent correctement. 
 
 ```js
     beforeEach(async function () {
@@ -115,6 +116,7 @@ Ici, nous effectuons differents tests. Avant chacun de ces tests, nous simullons
 ```
 
 Ensuite nous testons que; la balance du nombre de token disponible se décremente, la balance du marketCap s'incrémente, et la balance de l'investisseur s'actualise. 
+
 ```js
    it('should decrease the supply in sale', async function () {
       expect(await kb9ico.supplyInSale()).to.equal(TOTAL_SUPPLY.sub(200 * RATE_PRICE));
@@ -131,7 +133,10 @@ Ensuite nous testons que; la balance du nombre de token disponible se décrement
 #### Withdraw : 
 
 L'owner peut retirer les ethers reçut sur sa balance, uniquement si l'ICO est terminée. 
+
+
 Dans ce cas, on commence par tester, la réponse, en cas d'appel de la function, alors que l'ico n'est pas fini.
+
 ```js 
   it('Should revert if ico not closed', async function () {
       await expect(kb9ico.connect(owner).withdraw()).to.be.revertedWith('KB9ICO : ico is not closed');
@@ -159,13 +164,10 @@ Puis on test, que la fonction reverte bien, si quelqu'un dautre que l'owner appe
       )
     })
 ```
-Enfin, on verifie que la balance du contract se met bien à zero apres le transfert des fond vers l'owner.
+Enfin, on verifie que la balance du contract se met bien à zero apres le transfert des fonds vers l'owner.
 
 ```js
 it('should set the ico balance at zero', async function () {
       expect(await kb9ico.icocontractBalance()).to.equal(0)
     })
 ```
-
-
- 
