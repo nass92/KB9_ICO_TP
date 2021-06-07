@@ -117,6 +117,12 @@ describe ('without Bonus', function() {
     it('should update the token balance of buyer', async function () {
       expect(await kb9ico.tokenBalanceOf(investor2.address)).to.equal(100 * RATE_PRICE)
     }) 
+    it('Emits KB9TokenBought event', async function () {
+      await expect(kb9ico.connect(investor1).buyToken({ value: 100 }))
+        .to.emit(kb9ico, 'KB9TokenBought')
+        .withArgs(investor1.address, 100 * RATE_PRICE);
+    });
+
   })
 
 
@@ -149,8 +155,8 @@ describe ('without Bonus', function() {
   describe('withdraw', async function () {
     beforeEach(async function () {
       await benzematoken.connect(owner).approve(kb9ico.address, TOTAL_SUPPLY)
-      await kb9ico.connect(investor1).buyToken({ value: 1000 });
-      
+      await ethers.provider.send('evm_increaseTime', [604901]) 
+       await ethers.provider.send('evm_mine')
     });
    it('Should revert if ico not closed', async function () {
       await expect(kb9ico.connect(owner).withdraw()).to.be.revertedWith('KB9ICO : ico is not closed');
@@ -171,16 +177,18 @@ describe ('without Bonus', function() {
     })
 
     it('should set the ico balance at zero', async function () {
+      await kb9ico.connect(investor1).buyToken({ value: 100 });
+      await kb9ico.connect(investor2).buyToken({ value: 100 });
       expect(await kb9ico.icocontractBalance()).to.equal(0)
     })
-/*
+
     it('Emits Withdrawed event', async function () {
-      await ethers.provider.send('evm_increaseTime', [1210000]) // one week = 604800 second
+      await kb9ico.connect(investor1).buyToken({ value: 100 });
+      await kb9ico.connect(investor2).buyToken({ value: 100 });
+      await ethers.provider.send('evm_increaseTime', [1210000]) 
       await ethers.provider.send('evm_mine')
-      await expect(kb9ico.connect(owner).withdraw())
-        .to.emit(kb9ico, 'Withdrawed')
-        .withArgs(owner.address, TOTAL_SUPPLY - (1000 * RATE_PRICE));
-    });*/
+      await expect(kb9ico.connect(owner).withdraw()).to.emit(kb9ico, 'Withdrawed').withArgs(owner.address, 200);
+});
 
   });
 

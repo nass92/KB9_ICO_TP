@@ -12,10 +12,10 @@ describe('benzematoken', function () {
     benzematoken = await BenzemaToken.connect(dev).deploy(TOTAL_SUPPLY, owner.address)
     await benzematoken.deployed()
   })
-  it(`Should have name ${NAME}`, async function () {
+  it(`Should have name: ${NAME}`, async function () {
     expect(await benzematoken.name()).to.equal(NAME);
   });
-  it(`Should have symbol ${SYMBOL}`, async function () {
+  it(`Should have symbol: ${SYMBOL}`, async function () {
     expect(await benzematoken.symbol()).to.equal(SYMBOL);
   });
 

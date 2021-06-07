@@ -14,8 +14,7 @@ contract KB9ICO is Ownable {
     uint256 private _icoClosed;
     mapping(address => uint256) private _tokenBalances;
 
-    event KB9TokenBought(address indexed buyer, uint256 amount, uint256 totalSupplyBought);
-    event StartIco(address indexed owner, address indexed icoContract, uint256 supplyInSale);
+    event KB9TokenBought(address indexed buyer, uint256 amount);
     event Withdrawed(address indexed sender, uint256 amount);
 
     constructor(address kb9TokenAddress, address owner_, uint256 ratePrice_) Ownable() {
@@ -46,7 +45,8 @@ contract KB9ICO is Ownable {
 * - le nombre de token diminue en fonction de la demande. 
 * - Le MarketCap augmente 
 * - l'investisseur recoit les tokens demandés. 
-* le Montant de token à recevoir est égale au nombre d'ether envoyés mul par le taux (ratePrice) definit par l'owner. 
+* le Montant de token à recevoir est égale au nombre d'ether envoyés mul par le taux (ratePrice) definit par l'owner.
+* Si l'investisseur achete notre token la 1er semaine, alors il recevra un bonus equivalent à la moitié du total investit. 
  */
 
   function buyToken() public payable icoOpen {
@@ -57,7 +57,7 @@ contract KB9ICO is Ownable {
         _supplyInSale -= amountKB9;
         _MarketCap += msg.value;
       _token.transferFrom(owner(), msg.sender, amountKB9 ); 
-      emit KB9TokenBought(msg.sender, msg.value, amountKB9);
+      emit KB9TokenBought(msg.sender, amountKB9);
       } else {
           uint256 amountKB9 = msg.value * _ratePrice; 
         require(_supplyInSale != 0, "KB9ICO: there is no more token available.");
@@ -65,17 +65,9 @@ contract KB9ICO is Ownable {
         _supplyInSale -= amountKB9;
         _MarketCap += msg.value;
       _token.transferFrom(owner(), msg.sender, amountKB9 ); 
-      emit KB9TokenBought(msg.sender, msg.value, amountKB9);
+      emit KB9TokenBought(msg.sender, amountKB9);
       }
       
-       /*uint256 amountKB9 = msg.value * _ratePrice; 
-        require(_supplyInSale != 0, "KB9ICO: there is no more token available.");
-        _tokenBalances[msg.sender] += amountKB9;
-        _supplyInSale -= amountKB9;
-        _MarketCap += msg.value;
-      _token.transferFrom(owner(), msg.sender, amountKB9 ); 
-      emit KB9TokenBought(msg.sender, msg.value, amountKB9);
-     **/
     }
 
     /**
@@ -91,26 +83,25 @@ receive() external payable icoOpen {
         _supplyInSale -=  amountKB9;
         _MarketCap += msg.value;
       _token.transferFrom(owner(), msg.sender, amountKB9 ); 
-      emit KB9TokenBought(msg.sender, msg.value, amountKB9);
+      emit KB9TokenBought(msg.sender, amountKB9);
 }
 
 
 /**
-* @notice Cette fonction permet à l'Owner de withdraw toute la balance du smart contract ICO lorsque l'ICO sera terminée, 
+* @notice La fonction Withdraw permet à l'Owner de withdraw toute la balance du smart contract ICO lorsque l'ICO sera terminée, 
 * c'est à dire 2 semaines après le déploiement.
  */
 
  function withdraw() public onlyOwner icoClosed {
-        uint256 icoBalance = _token.balanceOf(address(this));
-        require(icoBalance != 0, "KB9ICO : you can not withdraw empty balance");
-        payable(msg.sender).transfer(icoBalance);
-        emit Withdrawed(msg.sender, icoBalance);
+        require(_MarketCap != 0, "KB9ICO : you can not withdraw empty balance");
+        payable(msg.sender).transfer(_MarketCap);
+        emit Withdrawed(msg.sender, _MarketCap);
     }
 
    function startICO() public onlyOwner {
         (block.timestamp > (_currentTime + 2 weeks));
         _token.approve(address(this), _token.totalSupply());
-        emit StartIco(owner(), address(this), _supplyInSale);
+       
     }
 
 // function view 
@@ -138,7 +129,7 @@ receive() external payable icoOpen {
     }
     function isContractClosed() public view returns (bool) {
         if((block.timestamp > (_currentTime + 2 weeks) )) {
-return true;
+            return true;
         }
         
     }
